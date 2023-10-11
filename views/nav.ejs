@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg bg-secondary" data-bs-theme="dark">
+  <div class="container-fluid">
+    
+    <a class="navbar-brand" href="/"><img src="/images/home.png" width="40px"></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/books">search</a>
+        </li> 
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/users">사용자목록</a>
+        </li>     
+      </ul>
+      <ul class="navbar-nav d-flex">
+        <li id="login" class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/users/login">로그인</a>
+        </li>
+        <li id="signup" class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/users/signup">회원가입</a>
+        </li>
+
+        <li id="mypage" class="nav-item d-flex" style="display:none;">
+          <a class="nav-link active" aria-current="page" href="/users/mypage"></a>
+        </li>
+        <li id="logout" class="nav-item" style="display:none;">
+          <a class="nav-link active" aria-current="page" href="/users/logout">로그아웃</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<script>
+  if(sessionStorage.getItem('uid')){
+    $('#login,#logout,#mypage,#signup').toggle();
+    $('#mypage a').html(sessionStorage.getItem('uid')+' 님');
+  }
+
+  $('#logout').on('click','a',function(e){
+    e.preventDefault();
+    sessionStorage.clear();
+    location.href='/';
+  })
+</script>
+

@@ -1,0 +1,162 @@
+<div class="my-5">
+  <h1 class="text-center"><img src="/images/BookGIF.gif" width="50px">도서검색</h1>
+  <div class="row justify-content-end mb-3">
+    <form id="frm" name="frm" class="col-md-4 col-lg-3">
+      <div class="input-group">
+        <input class="form-control" name="query" id="query">
+        <button type="submit" class="btn btn-outline-secondary"><img src="/images/search.png" width="30px"></button>
+      </div>
+    </form>
+  </div>
+  <div id="div_books"></div>
+  <div class="text-center">
+    <button id="prev" class="btn  btn-outline-secondary"><img src="/images/left.png" width="20px"></button>
+    <span id="span_page" class="mx-3">1/10</span>
+    <button id="next" class="btn btn-outline-secondary"><img src="/images/right.png" width="20px"></button>
+  </div>
+</div>
+<button id="fetchData">GPT 추천</button>
+    <p id="response"></p>
+<!--도서검색 템플릿-->
+<script id="temp_books" type="x-handlebars-template">
+  <table class="table table-hover ">
+    <thead class="table-light table-bordered">
+      <tr>
+        <th></th>
+        <th>제목</th>
+        <th>저자</th>
+        <th>가격</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each documents}}
+      <tr>
+        <td><img src="{{isImg thumbnail}}" width='50'></td>
+        <td>{{title}}</td>
+        <td>{{authors}}</td>
+        <td>{{fmtPrice price}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</script>
+
+<script>
+  //도서 이미지 여부 체크 함수
+  Handlebars.registerHelper('isImg',function(image){
+    if(image){
+      return image;
+    } else{
+      return "http://via.placeholder.com/170x200";
+    }
+  })
+  //가격리턴 정규식
+  Handlebars.registerHelper('fmtPrice',function(price){
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원"
+  })
+</script>
+<script>
+  let query = "_";
+  let page = 1;
+  getBooks();
+  function getBooks(){
+    $.ajax({
+      type:'get',
+      url:"https://dapi.kakao.com/v3/search/book?target=title",
+      headers:{"Authorization": "KakaoAK 3587f3950a53c450ab090ef0bd43a49e"},
+      data:{query:query,page:page,size:5},
+      success:function(data){
+        console.log(data)
+        const temp = Handlebars.compile($('#temp_books').html());
+        $('#div_books').html(temp(data));
+        const last = Math.ceil(data.meta.pageable_count/5);
+        $('#span_page').html(`${page}/${last}`);
+
+        if(page == 1) $('#prev').attr('disabled',true);
+        else $('#prev').attr('disabled',false)
+        if(data.meta.is_end)$('#next').attr('disabled',true)
+        else $('#next').attr('disabled',false)
+      }
+    });
+  }
+
+  $(frm).on('submit',function(e){
+    e.preventDefault();
+    query = $(frm.query).val().trim();
+    console.log(query)
+    if(query == ""){
+      alert("검색어를 입력하세요")
+      $(frm).focus();
+    } else {
+      getBooks();
+    }
+  })
+
+  $('#prev').on('click',function(){
+    page--;
+    getBooks();
+  })
+  $('#next').on('click',function(){
+    page++;
+    getBooks();
+  })
+      document.getElementById('fetchData').addEventListener('click', async function() {
+        try {
+            const response = await fetch('https://api.openai.com/v1/engines/davinci/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer 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', // 여기에 API 키를 입력합니다.
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: `Make a list of five books about the future and show them this keyword "${searchQuery}"?`,
+
+                    max_tokens: 1000
+                })
+            });
+
+            const data = await response.json();
+
+            const allResponses = data.choices.map(choice => choice.text.trim()).join('\n\n');
+            document.getElementById('response').textContent = allResponses;
+            console.log(allResponses);
+
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('response').textContent = 'Error occurred.';
+        }
+    });
+
+</script>
+
+<script>
+  document.getElementById('fetchData').addEventListener('click', async function() {
+    try {
+        const response = await fetch('https://api.openai.com/v1/engines/davinci/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer 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', // 여기에 API 키를 입력합니다.
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt: `Make a list of five books about the future and show them this keyword "${searchQuery}"?`,
+
+                max_tokens: 1000
+            })
+        });
+
+        const data = await response.json();
+
+        const allResponses = data.choices.map(choice => choice.text.trim()).join('\n\n');
+        document.getElementById('response').textContent = allResponses;
+        console.log(allResponses);
+
+
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('response').textContent = 'Error occurred.';
+    }
+});
+
+</script>

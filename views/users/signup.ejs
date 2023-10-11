@@ -1,0 +1,136 @@
+<style>
+  .btn {
+    width: 100px;
+  }
+  span {
+    width: 150px;
+  }
+  .text {
+    font-size:small;
+    color: grey;
+    margin-left: 20px;
+  }
+</style>
+<div  class="my-5 row justify-content-center">
+  <h3 class="text-center">회원가입</h3>
+  
+  <form name="frm" class="card col-md-6 p-3" method="post">
+    <div class="input-group">
+      <span class="input-group-text">ID&emsp;&emsp;&emsp;</span>
+      <input name="uid" class="form-control">
+      <button type="button" id="idcheck" class="btn btn-success">중복체크</button>     
+    </div>
+    <!--중복체크 알림 박스-->
+    <div id="text-duplicated" class="text" style="display: none;">
+      <span style="color: red;">이미 존재하는 사용자 입니다</span>
+    </div>
+    <div id="text-rewrite"  class="text" style="display: none;">
+      <span >id는 2글자이상으로 작성해주세요</span>
+    </div>
+    <div id="text-able"  class="text" style="display: none;">
+      <span style="color:green">사용가능한 ID입니다</span>
+    </div>
+    
+    <div class="input-group my-3">
+      <span class="input-group-text">PASSWORD&emsp;</span>
+      <input name="upass" type="password" class="form-control">
+    </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text">PASSWORD 확인</span>
+      <input name="upass2" type="password" class="form-control">
+    </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text"> 이름 </span>
+      <input name="uname"  class="form-control">
+    </div>
+
+
+    <div class="input-group mb-3">
+      <span class="input-group-text"> 전화번호</span>
+      <input name="phone"  class="form-control">
+    </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text">주소</span>
+      <input name="address1"  class="form-control">
+      <button type="button" class="btn btn-success">주소검색</button> 
+    </div>
+
+    <div class="input-group mb-3">
+      <input name="adress2"  class="form-control" placeholder=" 상세주소 입력">
+    </div>
+    <div class="text-center">
+      <button type="submit" class="btn btn-secondary ">회원가입</button>
+      <button type="reset" class="btn btn-light btn-outline-secondary">취소</button>
+    </div>
+    
+  </form>
+</div>
+
+<script>
+
+  //유효성 체크
+  let check = false;
+  $(frm).on('submit',function(e){
+    e.preventDefault();
+    const uid=$(frm.uid).val();
+    const upass=$(frm.upass).val();
+    const upass2=$(frm.upass2).val();
+    const uname=$(frm.uname).val();
+    const phone=$(frm.phone).val();
+    const address1=$(frm.address1).val();
+    const address2=$(frm.address2).val();
+
+    if(uid ==""){
+      alert('아이디를 입력하세요')
+      $(frm.uid).focus();
+      return;
+    } else if(check==false){
+      alert('ID 중복체크가 필요합니다.')
+      $(frm.upass).focus();
+      return;
+    } else if(upass != upass2){
+      alert('PASSWORD와 PASSWORD확인 입력값이 일치하지 않습니다.')
+        $(frm.upass).val(''); 
+        $(frm.upass2).val(''); 
+        $(frm.upass).focus();
+        return;
+    }else{
+      if(confirm("회원등록을 하시겠습니까?")){
+        frm.submit();
+        return;
+      }
+    }
+  });
+
+  $('#idcheck').on('click',function(){
+    const uid = $(frm.uid).val();
+    const upass = "";
+    console.log(uid)
+    $.ajax({
+      type:'post',
+      url:'/users/login',
+      data:{uid:uid,upass:upass},
+      success:function(data){
+        if(uid == ""){
+          alert('아이디를 입력하세요')
+          $(frm.uid).focus();
+          return;
+        }
+        if(data == '0'){
+          $('.text').css('display','none');
+          $('#text-able').css('display','block');        
+          check = true;
+        } else if(data == '1') {
+          
+          $('.text').css('display','none');
+          $('#text-duplicated').css('display','block');          
+        } else if(uid.length < 2){
+          alert('두글자이상')
+        }
+      }
+    })  
+  })
+</script>
